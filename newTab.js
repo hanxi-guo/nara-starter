@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const backgroundContainer = document.createElement("div");
   backgroundContainer.className = "background-container";
   document.body.appendChild(backgroundContainer);
@@ -20,6 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Background images for each category
   const backgroundSets = {
     daily: [
+      "assets/A.png",
+      "assets/A1.png",
+      "assets/A2.png",
+      "assets/A3.png",
+      "assets/A4.png",
+      "assets/A5.png",
+    ],
+    weekly: [
       "assets/A.png",
       "assets/A1.png",
       "assets/A2.png",
@@ -79,6 +87,15 @@ document.addEventListener("DOMContentLoaded", () => {
       height: 250,
       circleImage: "assets/circle_selfcare.png",
       category: "daily",
+    },
+    {
+      id: "deer7", // weekly deer
+      top: 20,
+      left: 400,
+      width: 300,
+      height: 300,
+      circleImage: "assets/circle_weekly.png",
+      category: "weekly",
     },
     {
       id: "deer2",
@@ -294,6 +311,50 @@ document.addEventListener("DOMContentLoaded", () => {
       "Put on sunscreen",
       "Take five minutes to shave",
     ],
+    weekly: [
+      // Self-Care
+  "Drink 8 glasses of water every day",
+  "Do a 5-minute meditation each morning",
+  "Go to bed before 11 PM each night",
+  "Journal 3 things you're grateful for daily",
+  "Avoid screens 30 minutes before bed",
+  "Stretch your body for 5 minutes every day",
+  "Do one thing just for yourself each day",
+  "Say something kind to yourself in the mirror",
+  "Choose a mantra and repeat it daily",
+
+  // Home
+  "Tidy up one small area each day",
+  "Water your plants or check on your space",
+  "Do one load of laundry or dishes daily",
+  "Light a candle or diffuse essential oils",
+  "Spend 10 minutes decluttering your space",
+  "Make your bed every morning",
+  "Open a window and get fresh air once a day",
+
+  // Body
+  "Take a 10-minute walk daily",
+  "Do 10 squats, pushups, or stretches every day",
+  "Dance to one song each day",
+  "Try a short yoga video each evening",
+  "Practice good posture for 1 hour a day",
+  "Spend at least 1 hour away from your chair",
+
+  // Mind
+  "Read one page (or more) of a book daily",
+  "Try one new thing each day",
+  "Avoid complaining for a day",
+  "No phone during meals challenge",
+  "Spend 15 minutes being completely offline",
+
+  // Connection
+  "Send a nice message to someone you care about",
+  "Compliment someone new every day",
+  "Call or text someone you haven't spoken to in a while",
+  "Try a new recipe or snack",
+  "Watch the sunset or sunrise at least once",
+  "Laugh out loud once a day"
+    ],
     home: [
       "Wipe down kitchen counters and stove",
       "Vacuum your space",
@@ -354,7 +415,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to get 5 random tasks from a category
   function getRandomTasks(category) {
     const tasks = taskPool[category];
-    return shuffleArray([...tasks]).slice(0, 5);
+    if (category === "weekly") {
+      // ensure no duplicate tasks for weekly category
+      const shuffled = [...tasks];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, 5);
+    } else {
+      // maintain original logic for other categories
+      return shuffleArray([...tasks]).slice(0, 5);
+    }
   }
 
   const hardcodedTasks = {
@@ -414,57 +486,193 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  categoriesContainer.addEventListener("click", (event) => {
+  // add alert modal temporarily  so do not put it in the styles.css
+  const style = document.createElement('style');
+  style.textContent = `
+    .alert-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      text-align: center;
+      font-size: 16px;
+      min-width: 300px;
+    }
+    .alert-modal.show {
+      display: block;
+    }
+    .close-task-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+    .close-task-button:hover {
+      color: #333;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // create alert modal
+  const alertModal = document.createElement('div');
+  alertModal.className = 'alert-modal';
+  document.body.appendChild(alertModal);
+
+  // show alert modal
+  function showAlert(message, duration = 2000) {
+    alertModal.textContent = message;
+    alertModal.classList.add('show');
+    setTimeout(() => {
+      alertModal.classList.remove('show');
+      // reset interface state after alert disappears
+      showHoverCircles();
+      changeBackgroundWithSlide(initialBackground);
+      categoriesContainer.classList.remove("hidden");
+      document.getElementById("welcome-message").classList.remove("hidden");
+      
+      // reset all listeners
+      removeAllListeners();
+      document.querySelectorAll(".deer-circle").forEach(circle => {
+        circle.classList.remove("active");
+      });
+      initializeEventListeners();
+    }, duration);
+  }
+
+  // check if the same day
+  function isSameDay(timestamp1, timestamp2) {
+    const date1 = new Date(timestamp1);
+    const date2 = new Date(timestamp2);
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  }
+
+  categoriesContainer.addEventListener("click", async (event) => {
     if (event.target.classList.contains("category-button")) {
       const category = event.target.dataset.category;
-      hideHoverCircles();
+      
+      // 
+      if (category === "weekly") {
+        hideHoverCircles();
+        // if saved weekly tasks, use them, otherwise generate new tasks
+        chrome.storage.local.get("weeklyState", (data) => {
+          let tasks;
+          if (data.weeklyState && data.weeklyState.tasks) {
+            tasks = data.weeklyState.tasks;
+          } else {
+            tasks = getRandomTasks("weekly").map((task) => ({
+              text: task,
+              completed: false,
+            }));
+            // save the new tasks
+            chrome.storage.local.set({
+              weeklyState: {
+                tasks,
+                backgroundIndex: 0,
+                isFinalImage: false,
+              },
+            });
+          }
 
-      if (category === "others") {
-        // Create five empty tasks for the "Others" category
-        const tasks = Array(5)
-          .fill()
-          .map(() => ({
-            text: "",
-            completed: false,
-          }));
-
-        chrome.storage.local.set({
-          state: {
-            tasks,
-            backgroundIndex: 0,
-            categoriesHidden: true,
-            isFinalImage: false,
-            selectedCategory: category,
-          },
-        });
-
-        // Set the background to the category's origin photo (e.g., A.jpg)
-        changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
-          // Render the empty tasks
-          renderTasks(tasks, 0, category);
+          // set the background and render the tasks
+          const backgroundIndex = data.weeklyState ? data.weeklyState.backgroundIndex : 0;
+          changeBackgroundWithSlide(backgroundSets[category][backgroundIndex]).then(() => {
+            renderWeeklyTasks(tasks, backgroundIndex, category);
+          });
         });
       } else {
-        const tasks = hardcodedTasks[category].map((task) => ({
-          text: task,
-          completed: false,
-        }));
-        chrome.storage.local.set({
-          state: {
-            tasks,
-            backgroundIndex: 0,
-            categoriesHidden: true,
-            isFinalImage: false,
-            selectedCategory: category,
-          },
+        const result = await new Promise(resolve => {
+          chrome.storage.local.get(['dailyCategoryChoice'], resolve);
         });
-        // Set the background to the category's origin photo (e.g., A.jpg)
-        changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
-          renderTasks(tasks, 0, category);
-        });
-      }
+        
+        const now = Date.now();
+        if (result.dailyCategoryChoice) {
+          const { timestamp, category: chosenCategory } = result.dailyCategoryChoice;
+          
+          // if the same day and different category, show alert
+          if (isSameDay(timestamp, now) && chosenCategory !== category) {
+            hideHoverCircles(); 
+            showAlert(`You have already chosen ${chosenCategory} today, please choose another category tomorrow`);
+            return;
+          }
+          if (!isSameDay(timestamp, now)) {
+            chrome.storage.local.set({
+              dailyCategoryChoice: {
+                category,
+                timestamp: now
+              }
+            });
+          }
+        } else {
+          chrome.storage.local.set({
+            dailyCategoryChoice: {
+              category,
+              timestamp: now
+            }
+          });
+        }
+        
+        hideHoverCircles();
+        if (category === "others") {
+          // Create five empty tasks for the "Others" category
+          const tasks = Array(5)
+            .fill()
+            .map(() => ({
+              text: "",
+              completed: false,
+            }));
 
-      categoriesContainer.classList.add("hidden");
-      hideHoverCircles();
+          chrome.storage.local.set({
+            state: {
+              tasks,
+              backgroundIndex: 0,
+              categoriesHidden: true,
+              isFinalImage: false,
+              selectedCategory: category,
+            },
+          });
+
+          // Set the background to the category's origin photo (e.g., A.jpg)
+          changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
+            // Render the empty tasks
+            renderTasks(tasks, 0, category);
+          });
+        } else {
+          const tasks = hardcodedTasks[category].map((task) => ({
+            text: task,
+            completed: false,
+          }));
+          chrome.storage.local.set({
+            state: {
+              tasks,
+              backgroundIndex: 0,
+              categoriesHidden: true,
+              isFinalImage: false,
+              selectedCategory: category,
+            },
+          });
+          // Set the background to the category's origin photo (e.g., A.jpg)
+          changeBackgroundWithSlide(backgroundSets[category][0]).then(() => {
+            renderTasks(tasks, 0, category);
+          });
+        }
+      }
+      
+      // special handling for weekly
+      if (category !== "weekly") {
+        categoriesContainer.classList.add("hidden");
+      }
       document.getElementById("welcome-message").classList.add("hidden");
     }
   });
@@ -500,23 +708,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Reset everything when "Yes" is clicked
   resetYesButton.addEventListener("click", () => {
-    // Clear the state in chrome.storage.local
-    chrome.storage.local.set({ state: null }, () => {
-      console.log("State reset to initial state.");
+    chrome.storage.local.set({ 
+      state: null, 
+      mood: null, 
+      weeklyState: null,
+      dailyCategoryChoice: null  
+    }, () => {
+      console.log("All states reset to initial state.");
     });
 
-    // Reset the UI to the initial state
+    // reset UI to initial state
     tasksContainer.classList.add("hidden");
     document.getElementById("welcome-message").classList.remove("hidden");
     changeBackgroundWithSlide(initialBackground);
 
-    // Remove thank you message if it exists
+    // remove thank you message if exists
     const thankYouMessage = document.querySelector(".thank-you-message");
     if (thankYouMessage) {
       thankYouMessage.remove();
     }
 
-    // Reattach hover listeners
+    // reattach hover listeners
     deerAreas.forEach((area) => {
       const circle = document.getElementById(`${area.id}-circle`);
 
@@ -620,25 +832,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks(tasks, backgroundIndex, category) {
-    const tasksHeader =
-      document.getElementById("tasks-header") || document.createElement("div");
+    const container = tasksContainer;
+
+    const tasksHeader = document.createElement("div");
     tasksHeader.id = "tasks-header";
     tasksHeader.innerHTML = `
-      <h1 class="task-title">today's list</h1>
-      <p class="task-subtitle">some tasks to help you feel good</p>
+      <h1 class="task-title">${category === "weekly" ? "weekly routine" : "today's list"}</h1>
+      <p class="task-subtitle">${category === "weekly" ? "tasks to keep you organized" : "some tasks to help you feel good"}</p>
+      <button class="close-task-button">❌</button>
     `;
 
-    if (!document.getElementById("tasks-header")) {
-      tasksContainer.innerHTML = "";
-      tasksContainer.appendChild(tasksHeader);
+    container.innerHTML = "";
+    container.appendChild(tasksHeader);
 
-      const newTaskList = document.createElement("ul");
-      newTaskList.id = "task-list";
-      tasksContainer.appendChild(newTaskList);
-    }
-
-    const taskListElement = document.getElementById("task-list");
-    taskListElement.innerHTML = "";
+    const taskList = document.createElement("ul");
+    taskList.id = "task-list";
+    taskList.className = "task-list";
 
     const sortedTasks = sortTasksByCompletion(tasks);
 
@@ -646,24 +855,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const taskItem = document.createElement("li");
       taskItem.classList.add("draggable");
       taskItem.innerHTML = `
-        <input type="checkbox" ${task.completed ? "checked" : ""} />
-        <div class="task-text" contenteditable="true" placeholder="New task">${
-          task.text
-        }</div>
-        ${
-          task.text && !task.completed
-            ? `<button class="delete-task"></button>`
-            : ""
-        }
+        <div class="task-content">
+          <input type="checkbox" ${task.completed ? "checked" : ""} />
+          <div class="task-text" contenteditable="true" placeholder="New task">${task.text}</div>
+        </div>
+        ${task.text && !task.completed ? `<button class="delete-task"></button>` : ""}
         <div class="drag-handle">
-         <div class="line"></div>
+          <div class="line"></div>
           <div class="line"></div>
           <div class="line"></div>
         </div>
       `;
-
-      taskItem.draggable = true;
-      taskItem.dataset.index = tasks.indexOf(task);
 
       const checkbox = taskItem.querySelector("input[type='checkbox']");
       checkbox.addEventListener("change", () => {
@@ -675,40 +877,20 @@ document.addEventListener("DOMContentLoaded", () => {
           if (deleteButton) deleteButton.remove();
         }
 
-        let newPosition = 0;
-        if (checkbox.checked) {
-          newPosition = tasks.filter(
-            (t, i) => t.completed && i < originalIndex
-          ).length;
-        } else {
-          newPosition = tasks.filter((t) => t.completed).length;
-        }
-
-        const [movedTask] = tasks.splice(originalIndex, 1);
-        tasks.splice(newPosition, 0, movedTask);
-
-        const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(tasks, category);
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
 
         if (isFinalImage) {
-          changeBackgroundWithSlide(
-            backgroundSets[category][backgroundSets[category].length - 1]
-          ).then(() => {
-            tasksContainer.classList.add("hidden");
+          changeBackgroundWithSlide(backgroundSets[category][backgroundSets[category].length - 1]).then(() => {
+            container.classList.add("hidden");
             categoriesContainer.classList.add("hidden");
-            hideHoverCircles(); // Hide hover circles when the final image is shown
             document.getElementById("welcome-message").classList.add("hidden");
-            // Create and show thank you message
             const thankYouMessage = document.createElement("div");
             thankYouMessage.className = "thank-you-message";
-            thankYouMessage.textContent =
-              "Thank you for taking good care of me";
+            thankYouMessage.textContent = "Thank you for taking good care of me";
             document.body.appendChild(thankYouMessage);
           });
         } else {
-          changeBackgroundWithSlide(
-            backgroundSets[category][newBackgroundIndex]
-          );
+          changeBackgroundWithSlide(backgroundSets[category][newBackgroundIndex]);
         }
 
         chrome.storage.local.set({
@@ -721,36 +903,14 @@ document.addEventListener("DOMContentLoaded", () => {
           },
         });
 
-        if (sortableInstance) {
-          const taskItems = Array.from(taskListElement.children);
-          const oldItemEl = taskItems[originalIndex];
-
-          taskListElement.removeChild(oldItemEl);
-          taskListElement.insertBefore(
-            oldItemEl,
-            taskListElement.children[newPosition]
-          );
-
-          sortableInstance.option("animation", 600);
-          sortableInstance.option("onEnd", null);
-          const evt = new CustomEvent("sortable:start");
-          taskListElement.dispatchEvent(evt);
-
-          oldItemEl.style.transition = "all 600ms ease";
-          oldItemEl.style.animation = "moveTask 600ms ease";
-
-          setTimeout(() => {
-            oldItemEl.style.transition = "";
-            oldItemEl.style.animation = "";
-          }, 600);
-        }
+        renderTasks(tasks, newBackgroundIndex, category);
       });
 
       const taskTextInput = taskItem.querySelector(".task-text");
       taskTextInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
-          event.preventDefault(); // Prevent the default behavior (new line)
-          taskTextInput.blur(); // Exit edit mode
+          event.preventDefault();
+          taskTextInput.blur();
         }
       });
 
@@ -759,46 +919,16 @@ document.addEventListener("DOMContentLoaded", () => {
         tasks[originalIndex].text = taskTextInput.textContent;
 
         const existingDeleteButton = taskItem.querySelector(".delete-task");
-
-        if (
-          tasks[originalIndex].text.trim() !== "" &&
-          !tasks[originalIndex].completed &&
-          !existingDeleteButton
-        ) {
+        if (tasks[originalIndex].text.trim() !== "" && !tasks[originalIndex].completed && !existingDeleteButton) {
           const deleteButton = document.createElement("button");
           deleteButton.className = "delete-task";
-
           deleteButton.addEventListener("click", () => {
             tasks.splice(originalIndex, 1);
-
             if (tasks.length < 5) {
               tasks.push({ text: "", completed: false });
             }
 
-            const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-              updateBackgroundState(tasks, category);
-
-            if (isFinalImage) {
-              changeBackgroundWithSlide(
-                backgroundSets[category][backgroundSets[category].length - 1]
-              ).then(() => {
-                tasksContainer.classList.add("hidden");
-                categoriesContainer.classList.add("hidden");
-                document
-                  .getElementById("welcome-message")
-                  .classList.add("hidden");
-                // Create and show thank you message
-                const thankYouMessage = document.createElement("div");
-                thankYouMessage.className = "thank-you-message";
-                thankYouMessage.textContent =
-                  "Thank you for taking good care of me";
-                document.body.appendChild(thankYouMessage);
-              });
-            } else {
-              changeBackgroundWithSlide(
-                backgroundSets[category][newBackgroundIndex]
-              );
-            }
+            const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
 
             chrome.storage.local.set({
               state: {
@@ -810,7 +940,7 @@ document.addEventListener("DOMContentLoaded", () => {
               },
             });
 
-            renderTasks(tasks, backgroundIndex, category);
+            renderTasks(tasks, newBackgroundIndex, category);
           });
           taskItem.appendChild(deleteButton);
         }
@@ -826,40 +956,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      // add delete button event listener
       const deleteButton = taskItem.querySelector(".delete-task");
       if (deleteButton) {
         deleteButton.addEventListener("click", () => {
-          const originalIndex = tasks.indexOf(task);
-          tasks.splice(originalIndex, 1);
-
+          tasks.splice(index, 1);
           if (tasks.length < 5) {
             tasks.push({ text: "", completed: false });
           }
 
-          const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-            updateBackgroundState(tasks, category);
-
-          if (isFinalImage) {
-            changeBackgroundWithSlide(
-              backgroundSets[category][backgroundSets[category].length - 1]
-            ).then(() => {
-              tasksContainer.classList.add("hidden");
-              categoriesContainer.classList.add("hidden");
-              document
-                .getElementById("welcome-message")
-                .classList.add("hidden");
-              // Create and show thank you message
-              const thankYouMessage = document.createElement("div");
-              thankYouMessage.className = "thank-you-message";
-              thankYouMessage.textContent =
-                "Thank you for taking good care of me";
-              document.body.appendChild(thankYouMessage);
-            });
-          } else {
-            changeBackgroundWithSlide(
-              backgroundSets[category][newBackgroundIndex]
-            );
-          }
+          const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
 
           chrome.storage.local.set({
             state: {
@@ -875,65 +981,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      taskListElement.appendChild(taskItem);
-
-      if (!document.querySelector("#task-animations")) {
-        const style = document.createElement("style");
-        style.id = "task-animations";
-        style.textContent = `
-          @keyframes moveTask {
-            0% {
-              transform: translateY(0);
-            }
-            50% {
-              transform: translateY(-10px);
-            }
-            100% {
-              transform: translateY(0);
-            }
-          }
-        `;
-        document.head.appendChild(style);
-      }
+      taskList.appendChild(taskItem);
     });
 
-    // Initialize or update SortableJS
+    container.appendChild(taskList);
+    container.classList.remove("hidden");
+
+    // initialize Sortable
     if (sortableInstance) {
       sortableInstance.destroy();
     }
-
-    sortableInstance = new Sortable(taskListElement, {
+    sortableInstance = new Sortable(taskList, {
       animation: 600,
       easing: "cubic-bezier(0.22, 1, 0.36, 1)",
       ghostClass: "sortable-ghost",
       chosenClass: "sortable-chosen",
-
+      dragClass: "sortable-drag",
+      handle: ".drag-handle",
       onUpdate: (evt) => {
         const [movedTask] = tasks.splice(evt.oldIndex, 1);
         tasks.splice(evt.newIndex, 0, movedTask);
 
-        const { backgroundIndex: newBackgroundIndex, isFinalImage } =
-          updateBackgroundState(tasks, category);
-
-        if (isFinalImage) {
-          changeBackgroundWithSlide(
-            backgroundSets[category][backgroundSets[category].length - 1]
-          ).then(() => {
-            tasksContainer.classList.add("hidden");
-            categoriesContainer.classList.add("hidden");
-            document.getElementById("welcome-message").classList.add("hidden");
-            // Create and show thank you message
-            const thankYouMessage = document.createElement("div");
-            thankYouMessage.className = "thank-you-message";
-            thankYouMessage.textContent =
-              "Thank you for taking good care of me";
-            document.body.appendChild(thankYouMessage);
-          });
-        } else {
-          changeBackgroundWithSlide(
-            backgroundSets[category][newBackgroundIndex]
-          );
-        }
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
 
         chrome.storage.local.set({
           state: {
@@ -947,6 +1016,385 @@ document.addEventListener("DOMContentLoaded", () => {
       },
     });
 
-    tasksContainer.classList.remove("hidden");
+    const closeButton = container.querySelector(".close-task-button");
+    closeButton.addEventListener("click", () => {
+      // hide current container first
+      container.classList.add("hidden");
+      
+      // restore background
+      changeBackgroundWithSlide(initialBackground).then(() => {
+        // show all interface elements
+        showHoverCircles();
+        categoriesContainer.classList.remove("hidden");
+        document.getElementById("welcome-message").classList.remove("hidden");
+        
+        // reset all event listeners
+        removeAllListeners();
+        document.querySelectorAll(".deer-circle").forEach(circle => {
+          circle.classList.remove("active");
+        });
+        
+        // reinitialize event listeners
+        initializeEventListeners();
+        
+        // reset task list state
+        container.innerHTML = "";
+        
+        // remove thank you message if exists
+        const thankYouMessage = document.querySelector(".thank-you-message");
+        if (thankYouMessage) {
+          thankYouMessage.remove();
+        }
+      });
+    });
+  }
+
+  // special handling for weekly
+  function renderWeeklyTasks(tasks, backgroundIndex, category) {
+    const weeklyContainer = document.getElementById("tasks-container") || document.createElement("div");
+    weeklyContainer.id = "tasks-container";
+    if (!weeklyContainer.parentElement) {
+      document.body.appendChild(weeklyContainer);
+    }
+
+    const tasksHeader = document.createElement("div");
+    tasksHeader.id = "tasks-header";
+    tasksHeader.innerHTML = `
+      <h1 class="task-title">weekly routine</h1>
+      <p class="task-subtitle">tasks to keep you organized</p>
+      <button class="close-task-button">❌</button>
+    `;
+
+    weeklyContainer.innerHTML = "";
+    weeklyContainer.appendChild(tasksHeader);
+
+    const taskList = document.createElement("ul");
+    taskList.id = "task-list";
+    taskList.className = "task-list";
+
+    const sortedTasks = sortTasksByCompletion(tasks);
+
+    sortedTasks.forEach((task) => {
+      const taskItem = document.createElement("li");
+      taskItem.classList.add("draggable");
+      taskItem.innerHTML = `
+        <div class="task-content">
+          <input type="checkbox" ${task.completed ? "checked" : ""} />
+          <div class="task-text">${task.text}</div>
+        </div>
+        ${task.text && !task.completed ? `<button class="delete-task"></button>` : ""}
+        <div class="drag-handle">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      `;
+
+      const checkbox = taskItem.querySelector("input[type='checkbox']");
+      checkbox.addEventListener("change", () => {
+        const originalIndex = tasks.indexOf(task);
+        tasks[originalIndex].completed = checkbox.checked;
+
+        if (tasks[originalIndex].completed) {
+          const deleteButton = taskItem.querySelector(".delete-task");
+          if (deleteButton) deleteButton.remove();
+        }
+
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
+
+        if (isFinalImage) {
+          changeBackgroundWithSlide(backgroundSets[category][backgroundSets[category].length - 1]).then(() => {
+            weeklyContainer.classList.add("hidden");
+            const thankYouMessage = document.createElement("div");
+            thankYouMessage.className = "thank-you-message";
+            thankYouMessage.textContent = "Thank you for taking good care of me";
+            document.body.appendChild(thankYouMessage);
+          });
+        } else {
+          changeBackgroundWithSlide(backgroundSets[category][newBackgroundIndex]);
+        }
+
+        chrome.storage.local.set({
+          weeklyState: {
+            tasks,
+            backgroundIndex: newBackgroundIndex,
+            isFinalImage,
+          },
+        });
+
+        renderWeeklyTasks(tasks, newBackgroundIndex, category);
+      });
+
+      // add delete button event listener
+      const deleteButton = taskItem.querySelector(".delete-task");
+      if (deleteButton) {
+        deleteButton.addEventListener("click", () => {
+          const originalIndex = tasks.indexOf(task);
+          tasks.splice(originalIndex, 1);
+          
+          // get current task texts
+          const currentTaskTexts = tasks.map(t => t.text);
+          
+          // filter out unused tasks from weekly task pool
+          const unusedTasks = taskPool.weekly.filter(task => !currentTaskTexts.includes(task));
+          
+          // if there are unused tasks, randomly select one; if all used, start over with original task pool
+          let newTaskText;
+          if (unusedTasks.length > 0) {
+            const randomIndex = Math.floor(Math.random() * unusedTasks.length);
+            newTaskText = unusedTasks[randomIndex];
+          } else {
+            // if all tasks used, show prompt and use original task pool randomly select
+            showAlert("All weekly tasks have been used, starting over!", 2000);
+            const randomIndex = Math.floor(Math.random() * taskPool.weekly.length);
+            newTaskText = taskPool.weekly[randomIndex];
+          }
+          
+          // add new task
+          tasks.push({
+            text: newTaskText,
+            completed: false
+          });
+
+          const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
+
+          chrome.storage.local.set({
+            weeklyState: {
+              tasks,
+              backgroundIndex: newBackgroundIndex,
+              isFinalImage,
+            },
+          });
+
+          renderWeeklyTasks(tasks, newBackgroundIndex, category);
+        });
+      }
+
+      taskList.appendChild(taskItem);
+    });
+
+    weeklyContainer.appendChild(taskList);
+    weeklyContainer.classList.remove("hidden");
+
+    // initialize Sortable
+    if (sortableInstance) {
+      sortableInstance.destroy();
+    }
+    sortableInstance = new Sortable(taskList, {
+      animation: 600,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+      dragClass: "sortable-drag",
+      handle: ".drag-handle",
+      onUpdate: (evt) => {
+        const [movedTask] = tasks.splice(evt.oldIndex, 1);
+        tasks.splice(evt.newIndex, 0, movedTask);
+
+        const { backgroundIndex: newBackgroundIndex, isFinalImage } = updateBackgroundState(tasks, category);
+
+        chrome.storage.local.set({
+          weeklyState: {
+            tasks,
+            backgroundIndex: newBackgroundIndex,
+            isFinalImage,
+          },
+        });
+      },
+    });
+
+    const closeButton = weeklyContainer.querySelector(".close-task-button");
+    closeButton.addEventListener("click", () => {
+      weeklyContainer.classList.add("hidden");
+      showHoverCircles();
+      changeBackgroundWithSlide(initialBackground).then(() => {
+        categoriesContainer.classList.remove("hidden");
+        document.getElementById("welcome-message").classList.remove("hidden");
+        
+        removeAllListeners();
+        document.querySelectorAll(".deer-circle").forEach(circle => {
+          circle.classList.remove("active");
+        });
+        initializeEventListeners();
+      });
+    });
+  }
+
+  // 加载weekly状态
+  chrome.storage.local.get("weeklyState", (data) => {
+    if (data.weeklyState) {
+      const { tasks, backgroundIndex, isFinalImage } = data.weeklyState;
+      if (isFinalImage) {
+        changeBackgroundWithSlide(backgroundSets["weekly"][backgroundSets["weekly"].length - 1]);
+      } else if (document.getElementById("weekly-tasks-container")) {
+        renderWeeklyTasks(tasks, backgroundIndex, "weekly");
+      }
+    }
+  });
+
+  const moodButton = document.getElementById("mood-button");
+  const moodModal = document.getElementById("mood-modal");
+  const moodOptions = document.querySelectorAll(".mood-option");
+
+  // 添加mood-button的悬停检测
+  const moodArea = {
+    top: 20,
+    left: 40, // 230px宽度 + 40px右边距
+    width: 230,
+    height: 140
+  };
+
+  const checkMoodHover = (e) => {
+    const mouseX = e.pageX;
+    const mouseY = e.pageY;
+
+    if (
+      mouseX >= moodArea.left &&
+      mouseX <= moodArea.left + moodArea.width &&
+      mouseY >= moodArea.top &&
+      mouseY <= moodArea.top + moodArea.height
+    ) {
+      moodButton.classList.add("active");
+    } else {
+      moodButton.classList.remove("active");
+    }
+  };
+
+  document.addEventListener("mousemove", checkMoodHover);
+  hoverListeners.push(checkMoodHover);
+
+  // get the current mood
+  chrome.storage.local.get("mood", (data) => {
+    if (data.mood) {
+      updateMoodButton(data.mood);
+    }
+  });
+  moodButton.addEventListener("click", () => {
+    chrome.storage.local.get("mood", (data) => {
+      if (data.mood) {
+        const modalTitle = moodModal.querySelector("h2");
+        modalTitle.textContent = `You feel ${data.mood.charAt(0).toUpperCase() + data.mood.slice(1)} today`;
+        
+        // hide all options
+        moodOptions.forEach(option => {
+          option.classList.add("hidden");
+        });
+        
+        // after choice, show the selected option and make it larger
+        const selectedOption = Array.from(moodOptions).find(option => option.dataset.mood === data.mood);
+        if (selectedOption) {
+          selectedOption.classList.remove("hidden");
+          selectedOption.classList.add("selected-large");
+        }
+      } else {
+        const modalTitle = moodModal.querySelector("h2");
+        modalTitle.textContent = "How are you feeling today?";
+        
+        // show all options
+        moodOptions.forEach(option => {
+          option.classList.remove("hidden");
+          option.classList.remove("selected-large");
+        });
+      }
+    });
+    
+    moodModal.classList.remove("hidden");
+  });
+
+  // click outside the modal to close
+  moodModal.addEventListener("click", (e) => {
+    if (e.target === moodModal) {
+      moodModal.classList.add("hidden");
+    }
+  });
+
+  // handle the mood selection
+  moodOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      const selectedMood = option.dataset.mood;
+      
+      // save the selected mood
+      chrome.storage.local.set({ mood: selectedMood }, () => {
+        updateMoodButton(selectedMood);
+        moodModal.classList.add("hidden");
+      });
+    });
+  });
+
+  // update the mood button
+  function updateMoodButton(mood) {
+    const buttonIcon = moodButton.querySelector("img");
+    
+    // update the alt text
+    buttonIcon.alt = mood.charAt(0).toUpperCase() + mood.slice(1);
+  }
+
+  // 在文件开头附近添加这个函数
+  function initializeEventListeners() {
+    deerAreas.forEach((area) => {
+      const circle = document.getElementById(`${area.id}-circle`);
+      
+      const checkHover = (e) => {
+        const mouseX = e.pageX;
+        const mouseY = e.pageY;
+
+        if (
+          mouseX >= area.left &&
+          mouseX <= area.left + area.width &&
+          mouseY >= area.top &&
+          mouseY <= area.top + area.height
+        ) {
+          circle.classList.add("active");
+        } else {
+          circle.classList.remove("active");
+        }
+      };
+
+      const handleClick = (e) => {
+        if (!circle.classList.contains("hidden")) {
+          const mouseX = e.pageX;
+          const mouseY = e.pageY;
+
+          if (
+            mouseX >= area.left &&
+            mouseX <= area.left + area.width &&
+            mouseY >= area.top &&
+            mouseY <= area.top + area.height
+          ) {
+            const categoryButton = document.querySelector(
+              `.category-button[data-category="${area.category}"]`
+            );
+            if (categoryButton) {
+              categoryButton.click();
+              removeAllListeners();
+            }
+          }
+        }
+      };
+
+      document.addEventListener("mousemove", checkHover);
+      document.addEventListener("click", handleClick);
+      hoverListeners.push(checkHover, handleClick);
+    });
+
+    // 重新初始化mood按钮的事件监听
+    const checkMoodHover = (e) => {
+      const mouseX = e.pageX;
+      const mouseY = e.pageY;
+
+      if (
+        mouseX >= moodArea.left &&
+        mouseX <= moodArea.left + moodArea.width &&
+        mouseY >= moodArea.top &&
+        mouseY <= moodArea.top + moodArea.height
+      ) {
+        moodButton.classList.add("active");
+      } else {
+        moodButton.classList.remove("active");
+      }
+    };
+
+    document.addEventListener("mousemove", checkMoodHover);
+    hoverListeners.push(checkMoodHover);
   }
 });

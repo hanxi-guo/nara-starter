@@ -83,8 +83,8 @@ body {
     -webkit-backdrop-filter: blur(10px);
     border-radius: 24px;
     padding: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+    border: none;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -92,21 +92,37 @@ body {
 }
 
 .category-button {
-    background: rgba(255, 255, 255, 0.9);
+    background: transparent;
     border: none;
-    padding: 12px 24px;
+    padding: 0;
+    width: 230px;
+    height: 140px;
     border-radius: 12px;
     font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
     color: #4158D0;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.category-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .category-button:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
+    outline: none;
+}
+
+.category-button:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 /* Tasks container */
@@ -430,6 +446,18 @@ input[type="checkbox"]:checked+.task-text {
     transition: opacity 0.3s ease;
 }
 
+#deer7-circle {
+    width: 300px;
+    height: 300px;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
 #deer1-circle {
     width: 450px;
     height: 450px;
@@ -464,6 +492,10 @@ input[type="checkbox"]:checked+.task-text {
     opacity: 1;
 }
 
+#deer7-circle.active {
+    opacity: 1;
+}
+
 #categories-container {
     display: none !important;
     /* Hide the categories container by default */
@@ -487,4 +519,156 @@ input[type="checkbox"]:checked+.task-text {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     opacity: 0.95;
     animation: welcomeFadeIn 1s ease-out forwards;
-    }
+}
+
+/* moode choose */
+.mood-select-button {
+    top: 40px;
+    right: 40px;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mood-select-button:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.mood-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/*  */
+.mood-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.mood-modal.hidden {
+    display: none !important;
+}
+
+.mood-content {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 48px;
+    border-radius: 24px;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.mood-content h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #2c3e50;
+    font-family: 'Slackside One', sans-serif;
+    font-size: 2.5rem;
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    justify-items: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.mood-option {
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid transparent;
+    padding: 24px;
+    border-radius: 8px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 220px;
+    height: 220px;
+    justify-content: center;
+}
+
+.mood-option:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #0c9623;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mood-option.selected {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #0c9623;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.mood-option.selected-large {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: #0c9623;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: scale(1.2);
+    grid-column: span 3;
+    grid-row: span 3;
+    margin: 0 auto;
+    padding: 40px;
+    width: 250px;
+    height: 250px;
+    border-radius: 12px;
+}
+
+.mood-option.selected-large img {
+    width: 150px;
+    height: 150px;
+}
+
+.mood-option.selected-large span {
+    font-size: 36px;
+}
+
+.mood-option img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.mood-option span {
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 28px;
+    font-family: 'Slackside One', sans-serif;
+    text-align: center;
+}
+
+#mood-button {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+#mood-button.active {
+    opacity: 1;
+    pointer-events: auto;
+}

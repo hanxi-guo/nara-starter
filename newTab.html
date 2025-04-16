@@ -13,15 +13,52 @@
     />
   </head>
   <body>
+    <button id="mood-button" class="category-button" data-category="mood">
+      <img src="assets/mood.png" class="mood-icon">
+    </button>
+
+    <div id="mood-modal" class="mood-modal hidden">
+      <div class="mood-content">
+        <h2>How are you feeling today?</h2>
+        <div class="mood-grid">
+          <button class="mood-option" data-mood="happy">
+            <img src="assets/mood_happy.png" alt="Happy" class="mood-icon">
+            <span>Happy</span>
+          </button>
+          <button class="mood-option" data-mood="neutral">
+            <img src="assets/mood_neutral.png" alt="Neutral" class="mood-icon">
+            <span>Neutral</span>
+          </button>
+          <button class="mood-option" data-mood="excited">
+            <img src="assets/mood_excited.png" alt="Excited" class="mood-icon">
+            <span>Excited</span>
+          </button>
+          <button class="mood-option" data-mood="sad">
+            <img src="assets/mood_sad.png" alt="Sad" class="mood-icon">
+            <span>Sad</span>
+          </button>
+          <button class="mood-option" data-mood="angry">
+            <img src="assets/mood_angry.png" alt="Angry" class="mood-icon">
+            <span>Angry</span>
+          </button>
+          <button class="mood-option" data-mood="tired">
+            <img src="assets/mood_tired.png" alt="Tired" class="mood-icon">
+            <span>Tired</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <h1 id="welcome-message">Who do you want to care for today?</h1>
 
-    <!-- 
-  <div id="deer1-circle" class="deer-circle"></div>
-  <div id="deer2-circle" class="deer-circle"></div>
-  <div id="deer3-circle" class="deer-circle"></div>
-  <div id="deer4-circle" class="deer-circle"></div>
-  <div id="deer5-circle" class="deer-circle"></div>
-    -->
+    <!-- Deer circles -->
+    <div id="deer1-circle" class="deer-circle"></div>
+    <div id="deer7-circle" class="deer-circle"></div>
+    <div id="deer2-circle" class="deer-circle"></div>
+    <div id="deer3-circle" class="deer-circle"></div>
+    <div id="deer4-circle" class="deer-circle"></div>
+    <div id="deer5-circle" class="deer-circle"></div>
+    <div id="deer6-circle" class="deer-circle"></div>
 
     <div id="categories-container">
       <button class="category-button" data-category="daily">
@@ -32,6 +69,7 @@
       <button class="category-button" data-category="friends">Friends</button>
       <button class="category-button" data-category="mind">Mind</button>
       <button class="category-button" data-category="others">Others</button>
+      <button class="category-button" data-category="weekly">Weekly Routine</button>
     </div>
 
     <!-- Hover Circles -->
@@ -41,6 +79,7 @@
     <div id="deer4-circle" class="deer-circle"></div>
     <div id="deer5-circle" class="deer-circle"></div>
     <div id="deer6-circle" class="deer-circle"></div>
+    <div id="deer7-circle" class="deer-circle"></div>
 
     <div id="tasks-container" class="hidden">
       <ul id="task-list"></ul>
