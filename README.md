@@ -1,64 +1,52 @@
-# CIS 3500: Nara Extension Starter
+
+# CIS 3500: Nara Extension Enhancement
 
 ## Overview
-This assignment involves enhancing a Chrome extension developed by one of the Top 3 winners of the MCIT hackathon. The project provides hands-on experience in web development, API integration, and collaborative coding.
+This project is part of an enhancement assignment based on **Nara**, a Chrome extension originally developed by one of the Top 3 winners of the MCIT Hackathon. Nara helps users manage tasks and reminders in a visually engaging way.
 
-**Original project:** [Nara](https://github.com/luyiZhang818/Nara-Chrome-Extension)
-
-## Project Description
-Nara is a Chrome extension that helps users manage their tasks and reminders efficiently. Your task is to enhance this extension by implementing new features.
-
-## Enhancement Options
-Choose one of the following enhancements to implement:
-
-1. **Speech Bubble Encouragement**: Implement a feature where, whenever the user checks off a task, a speech or thought bubble appears near the deer with a short, encouraging message (e.g., “Great job!”, “You’re making progress!”, “Keep going!”).
-2. **Daily Gratitude Log**: Implement a small text area where users can note one thing they’re grateful for each day. Over time, they can revisit a dedicated “gratitude log” to see their positive moments. Provide an interesting method to save these entries and display them on a separate screen so users can easily access their past entries.
-3. **Mood Selection Prompt**: Implement a simple mood selection feature(e.g., happy, stressed, neutral) with a small icon or emoji. This allows users to log their emotional state quickly each day.
-4. **Rotating Weekly Challenge**: Implement a weekly challenge system—such as “Drink 8 glasses of water each day” or “Take a 10-minute walk daily.” Users can check off these mini-challenges alongside their normal tasks for extra motivation.
-5. **Inspirational Quote Overlay**: Implement a short inspirational quote or positive affirmation that appears on each new tab, displayed in a subtle text overlay.
-6. **Implement a History Feature**: Maintain a log of all tasks and reminders created by the user, allowing them to revisit past items and track progress over time.
-7. **Custom Feature**: Propose a unique feature (requires instructor/TA approval).
-
-## Getting Started
-
-### Step 1: Team Organization
-- Assign a team member as the **Product Manager (PM)** for Nara.
-- Ensure this PM is different from the one assigned to the Lunch Lotto project.
-
-### Step 2: Repository Setup
-The PM should fork the repository:
-1. Navigate to the `nara-extension-starter` repository on GitHub.
-2. Click the **Fork** button to create a copy under their account.
-
-### Step 3: Cloning the Repository
-Once the PM has forked the repository, team members should clone it locally:
-```sh
-git clone https://github.com/<PM-username>/nara-extension-starter.git
-```
-
-### Step 4: Development Workflow
-1. Open the project in a text editor (e.g., **Visual Studio Code** recommended).
-2. Make changes to the codebase.
-3. Use the following commands to commit and push your changes:
-
-```sh
-git add .
-git commit -m "feat: [feature name] added"
-git push
-```
-
-4. As team members contribute, collaborate using **Pull Requests (PRs)** on GitHub.
-5. Regularly sync your local repository with the latest changes:
-
-```sh
-git pull
-```
-
-6. Resolve merge conflicts as needed and ensure smooth integration.
-
-## Submission
-- Submit the final version of your project as per course guidelines.
-- Include a brief write-up of your implemented features and any challenges faced.
+The goal of this assignment was to extend Nara's functionality by implementing additional features that improve the user experience and encourage positive habits.
 
 ---
-Happy coding, and good luck with Nara! 🦌
+
+## Implemented Enhancements
+
+### ✅ Mood Selection Prompt
+We added a daily mood selection feature that allows users to log their emotional state with a simple click. Users can choose from several mood icons (e.g., happy, tried, neutral), which are stored for daily tracking. This promotes emotional awareness.
+
+**Highlights:**
+- User-friendly icons with hover tooltips.
+- One-click mood logging per day.
+- Mood state is visually displayed for the current day.
+
+### ✅ Rotating Weekly Challenge
+To motivate users further, we introduced a rotating weekly challenge system. Each week, a new mini-challenge is presented—such as “Take a 10-minute walk daily” or “Drink 8 glasses of water.” Users can check off these items as they go, helping them build positive routines.
+
+**Highlights:**
+- Automatic weekly challenge rotation from a pre-defined list.
+- Interactive checkboxes to track daily completion.
+- Challenge states are saved persistently throughout the week.
+
+
+---
+
+## Challenges Faced
+
+- Ensuring smooth integration with the existing codebase, especially when modifying shared state between components.
+- Designing UI components to be lightweight yet visually engaging, without disrupting the user's task flow.
+
+---
+
+## How to Run
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/<your-username>/nara-extension-starter.git
+   ```
+2. Open `chrome://extensions` in Chrome and enable **Developer Mode**.
+3. Click **Load unpacked** and select the project folder.
+4. Open a new tab to view the extension in action.
+
+---
+
+## Credits
+Built by Hanxi Guo and team as part of the Spring 2025 CIS 3500 coursework.  
+Original project by the MCIT Hackathon Top 3 team.
