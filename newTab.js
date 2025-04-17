@@ -1050,7 +1050,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // special handling for weekly
-  function renderWeeklyTasks(tasks, backgroundIndex, category) {
+  function renderWeeklyTasks(tasks, category) {
     const weeklyContainer = document.getElementById("tasks-container") || document.createElement("div");
     weeklyContainer.id = "tasks-container";
     if (!weeklyContainer.parentElement) {
