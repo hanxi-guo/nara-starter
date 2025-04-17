@@ -2,7 +2,7 @@
 # CIS 3500: Nara Extension Enhancement
 
 ## Overview
-This project is part of an enhancement assignment based on **Nara**, a Chrome extension originally developed by one of the Top 3 winners of the MCIT Hackathon. Nara helps users manage tasks and reminders in a visually engaging way.
+This project is part of an enhancement assignment based on [**Nara**](https://github.com/luyiZhang818/Nara-Chrome-Extension), a Chrome extension originally developed by one of the Top 3 winners of the MCIT Hackathon. Nara helps users manage tasks and reminders in a visually engaging way.
 
 The goal of this assignment was to extend Nara's functionality by implementing additional features that improve the user experience and encourage positive habits.
 
